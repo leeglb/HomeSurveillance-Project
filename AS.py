@@ -41,7 +41,13 @@ class LiveFeed():
         )
         print(response.request_id)
         print(response)
-        
+
+
+
+    def activate_system(self):
+
+
+        pass
 
     def main_function(self):
 
