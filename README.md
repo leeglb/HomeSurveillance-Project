@@ -29,4 +29,13 @@ image segmentation, image captionining and object tracking + countless others.
 <h3> Our Main Libraries: </h3>
 
 1. Ultralytics --> YOLO (Tracking Software)
+
+```
+pip install -U ultralytics
+```
+
 2. Courier (Email / SMS Service)
+
+``` 
+pip install trycourier
+```
