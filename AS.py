@@ -16,6 +16,9 @@ model = YOLO("yolo11n.pt") #pretrained model
 
 video_path = cv2.VideoCapture(0)
 
+video_path.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+video_path.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+
 people_counter = 0 
 
 alarm_started = False
@@ -24,6 +27,7 @@ DURATION = 10
 
 countdown = 0.0
 
+WINDOW_NAME = "Monitoring System" 
 # ------------------------------------------
 
 
@@ -74,7 +78,7 @@ class LiveFeed():
 
                     if time_remaining >= 0: 
 
-                        cv2.putText(annotated_frame, f"Countdown To Alarm Activation: {time_remaining}", (20, 300), cv2.FONT_HERSHEY_DUPLEX, 1, (255, 255, 255), 1)
+                        cv2.putText(annotated_frame, f"Countdown To Alarm Activation: {time_remaining}", (20, 300), cv2.FONT_HERSHEY_DUPLEX, 1, (255, 255, 255), 2)
                         
                         if time_remaining <= 0: 
                             
@@ -82,11 +86,11 @@ class LiveFeed():
                                 
                                 self.email_system()
                 
-                cv2.putText(annotated_frame, str(current_datetime), (20, 500), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 1)
+                cv2.putText(annotated_frame, str(current_datetime), (20, 500), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
                 
-                cv2.putText(annotated_frame, f"Number of individuals detected: {people_counter}", (20, 600), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 1)
+                cv2.putText(annotated_frame, f"Number of individuals detected: {people_counter}", (20, 600), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
                 
-                cv2.imshow("Monitoring System", annotated_frame)
+                cv2.imshow(WINDOW_NAME, annotated_frame)
 
                 key = cv2.waitKey(1) & 0xFF
                 
