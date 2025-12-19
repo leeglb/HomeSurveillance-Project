@@ -65,6 +65,8 @@ class LiveFeed():
                 
                 results = model.track(capture_frame, persist=True, classes=0) #classes = 0 for just people tracking. 
                 
+                global people_counter
+                
                 people_counter = len(results[0].boxes) #counts number of boxes identified
                 
                 annotated_frame = results[0].plot() 
@@ -82,9 +84,8 @@ class LiveFeed():
                         
                         if time_remaining <= 0: 
                             
-                            if people_counter >= 1:
-                                
-                                self.email_system()
+                            cv2.putText(annotated_frame, "Alarm Is Activated", (20, 300), cv2.FONT_HERSHEY_DUPLEX, 1, (255, 255, 255), 2)
+                            
                 
                 cv2.putText(annotated_frame, str(current_datetime), (20, 500), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
                 
@@ -103,6 +104,10 @@ class LiveFeed():
                     alarm_started = True
                     
                     countdown = time.time() + DURATION
+                    
+                elif key == ord("e"):
+                    
+                    self.email_system()
 
                                         
             else:
