@@ -23,6 +23,10 @@ people_counter = 0
 
 alarm_started = False
 
+alarm_paused = False 
+
+people_present = 0.0
+
 DURATION = 10
 
 countdown = 0.0
@@ -69,16 +73,18 @@ class LiveFeed():
                 
                 people_counter = len(results[0].boxes) #counts number of boxes identified
                 
-                annotated_frame = results[0].plot() 
+                annotated_frame  = results[0].plot() 
                 
                 global alarm_started
+                global alarm_paused
                 global countdown
+                global people_present
                  
                 if alarm_started: 
 
                     time_remaining = int(countdown - time.time())
 
-                    if time_remaining >= 0: 
+                    if time_remaining > 0: 
 
                         cv2.putText(annotated_frame, f"Countdown To Alarm Activation: {time_remaining}", (20, 300), cv2.FONT_HERSHEY_DUPLEX, 1, (255, 255, 255), 2)
                         
@@ -86,10 +92,23 @@ class LiveFeed():
                             
                             cv2.putText(annotated_frame, "Alarm Is Activated", (20, 300), cv2.FONT_HERSHEY_DUPLEX, 1, (255, 255, 255), 2)
                             
+                            if people_counter > 0: 
+                                
+                                people_present = time.time()
+                                
+                                cv2.putText(annotated_frame, f"Intruders present for {people_present}", (20, 700), cv2.FONT_HERSHEY_DUPLEX, 1, (255, 255, 255), 2)
+                                
+                                
+                            
+                if alarm_paused and alarm_started == False: 
+                    
+                    alarm_started = False 
+                    
+                    cv2.putText(annotated_frame, "Alarm Is Deactivated", (20, 300), cv2.FONT_HERSHEY_DUPLEX, 1, (255, 255, 255), 2)
                 
                 cv2.putText(annotated_frame, str(current_datetime), (20, 500), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
                 
-                cv2.putText(annotated_frame, f"Number of individuals detected: {people_counter}", (20, 600), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
+                cv2.putText(annotated_frame, f"Number of intruders detected: {people_counter}", (20, 600), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
                 
                 cv2.imshow(WINDOW_NAME, annotated_frame)
 
@@ -108,7 +127,13 @@ class LiveFeed():
                 elif key == ord("e"):
                     
                     self.email_system()
-
+                
+                
+                elif key == ord("p"):
+                    
+                    alarm_started = False 
+                    
+                    alarm_paused = True
                                         
             else:
                 
