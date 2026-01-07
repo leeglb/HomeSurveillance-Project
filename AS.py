@@ -19,7 +19,30 @@ video_path = cv2.VideoCapture(0)
 video_path.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
 video_path.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 
-people_counter = 0 
+start_capturing = False 
+
+frameWidth = int(video_path.get(cv2.CAP_PROP_FRAME_WIDTH))
+frameHeight = int(video_path.get(cv2.CAP_PROP_FRAME_HEIGHT))
+frameRate = int(video_path.get(cv2.CAP_PROP_FPS))
+
+if frameRate == 0 or frameRate is None:
+
+    frameRate = 30
+
+frameRate = float(frameRate)
+
+fourccCode = cv2.VideoWriter_fourcc(*'mp4v')
+
+videoDimensions = (frameWidth, frameHeight)
+videoFileName = f"Video_Recorded_{datetime.now().strftime('%Y%m%d_%H%M%S')}.mp4"
+
+recordedVideo = cv2.VideoWriter(videoFileName,
+                            fourccCode,
+                            frameRate,
+                            videoDimensions)
+
+people_counter = 0
+intrusion_length = 0.0 
 
 alarm_started = False
 
@@ -53,10 +76,6 @@ class LiveFeed():
             }
         )
 
-    def video_clip(self): 
-
-        pass 
-
     def main_function(self):
 
         while(True): 
@@ -73,6 +92,7 @@ class LiveFeed():
                 
                 global alarm_started
                 global countdown
+                global start_capturing
                  
                 if alarm_started: 
 
@@ -82,18 +102,44 @@ class LiveFeed():
 
                         cv2.putText(annotated_frame, f"Countdown To Alarm Activation: {time_remaining}", (20, 300), cv2.FONT_HERSHEY_DUPLEX, 1, (255, 255, 255), 2)
                         
-                    if time_remaining <= 0: 
+                    if time_remaining <= 0: # Alarm is now activated 
+
+                        """
+                        For this part, we are essentially saying the alarm is activated.
+
+                        We have the following steps we need to ensure that is working: 
+
+                        1. The counter for intruders is on.
+                        2. The timer for any appearance of an intruder is on. (If exceeding 5 seconds, system alerts user).
+                        3. When the timer does exceed 5 seconds and intruders dissapear, the system will capture from when alarm is activated to 10 
+                           seconds after no intruders are detected.
+                        
+                        """
 
                         global people_counter
                         
                         cv2.putText(annotated_frame, "Alarm Is Activated", (20, 300), cv2.FONT_HERSHEY_DUPLEX, 1, (255, 255, 255), 2)
             
-                        people_counter = len(results[0].boxes) #counts number of boxes identified
+                        people_counter = len(results[0].boxes) #counts number of boxes identified -> aka, number of intruders 
 
                         cv2.putText(annotated_frame, f"Number of intruders detected: {people_counter}", (20, 600), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
+
+                        if people_counter > 0: 
+
+                            start_time = datetime.now().second
+
+                            cv2.putText(annotated_frame, f"Intruders have been present for: {start_time} seconds.", (20, 700), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
+
+                            if people_counter == 0:
+
+                                end_time = time.time()
+
+            
                             
                 
                 cv2.putText(annotated_frame, str(current_datetime), (20, 500), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
+
+                recordedVideo.write(annotated_frame)
                 
                 cv2.imshow(WINDOW_NAME, annotated_frame)
 
@@ -113,14 +159,18 @@ class LiveFeed():
                     
                     self.email_system()
 
+                elif key == ord("c"):
+
+                    recordedVideo.release() # release means we stop recording. 
                                         
             else:
                 
                 break
         
-        
+
         video_path.release()
         cv2.destroyAllWindows()
+
         
 
 
