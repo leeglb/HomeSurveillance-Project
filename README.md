@@ -1,5 +1,8 @@
 <h1> Surveillance System - Using Object Detection </h1>
 
+
+
+
 <h2> The aim of the project: </h2>
 
 The aim of this project is to create a monitoring system
@@ -10,6 +13,12 @@ In the day and age where machine learning and artifical intelligence
 is utilised to track & monitor for targetted individuals and tracking,
 it is pivotal to understand the key technology and current software 
 for this sector. 
+
+
+
+---
+
+
 
 <h3> Prerequisites (System Capturing File): </h3>
 
@@ -47,6 +56,11 @@ pip install dotenv
 ```
 
 
+
+---
+
+
+
 <h3> Prerequisites (Jupyter Notebook File): </h3>
 
 1. Pandas:
@@ -66,6 +80,12 @@ pip install Matplotlib
 ``` 
 pip install -U statsmodels==0.14.4 scipy==1.14.1
 ```
+
+
+
+---
+
+
 
 <h3> Config File & .env File: </h3>
 
@@ -93,6 +113,12 @@ load_dotenv()
 API_KEY = os.getenv("COURIER_API_KEY")
 USER_EMAIL = os.getenv("EMAIL")
 ```
+
+
+
+---
+
+
 
 <h3> Why am I making this project? </h3>
 
