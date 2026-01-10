@@ -11,7 +11,7 @@ is utilised to track & monitor for targetted individuals and tracking,
 it is pivotal to understand the key technology and current software 
 for this sector. 
 
-<h3> Prerequisites (Capturing System File): </h3>
+<h3> Prerequisites (System Capturing File): </h3>
 
 1. Ultralytics: YOLO (Tracking Software)
 
@@ -31,7 +31,6 @@ pip install trycourier
 
 ```
 pip install opencv-contrib-python
-
 ```
 
 4. Some modules to import into our main file:
@@ -68,7 +67,7 @@ pip install Matplotlib
 pip install -U statsmodels==0.14.4 scipy==1.14.1
 ```
 
-<h3> Config File & .env File: <h3>
+<h3> Config File & .env File: </h3>
 
 1. Create a .env file which will contain both:
 
@@ -83,7 +82,7 @@ seperate from our application source code. (Hides important info pretty much.)
 
 2. Create a config.py file (In Source Code Already):
 
-<i> config.py <i>
+<i> config.py </i>
 
 ```
 from dotenv import load_dotenv
@@ -95,7 +94,7 @@ API_KEY = os.getenv("COURIER_API_KEY")
 USER_EMAIL = os.getenv("EMAIL")
 ```
 
-<h3> Why am I making this project? <h3>
+<h3> Why am I making this project? </h3>
 
 Whilst the project is nothing over the top, the importance of learning how to utilise prexisting tools,
 particularly in the field of machine learning and camera operation is important. OpenCV is an extensive tool for image and 
