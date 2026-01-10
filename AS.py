@@ -42,13 +42,8 @@ recordedVideo = cv2.VideoWriter(videoFileName,
                             videoDimensions)
 
 people_counter = 0
-intrusion_length = 0.0 
-
-alarm_started = False
-
-DURATION = 10
-
-countdown = 0.0
+intrusion_time = 0.0 
+end_time = 0.0 
 
 WINDOW_NAME = "Monitoring System" 
 # ------------------------------------------
@@ -90,53 +85,48 @@ class LiveFeed():
                 
                 annotated_frame = results[0].plot() 
                 
-                global alarm_started
-                global countdown
                 global start_capturing
-                 
-                if alarm_started: 
 
-                    time_remaining = int(countdown - time.time())
+                cv2.putText(annotated_frame, "Monitoring System Is Now Activated", (100, 300), cv2.FONT_HERSHEY_DUPLEX, 1, (255, 255, 255), 2)
+                    
 
-                    if time_remaining > 0: 
-
-                        cv2.putText(annotated_frame, f"Countdown To Alarm Activation: {time_remaining}", (20, 300), cv2.FONT_HERSHEY_DUPLEX, 1, (255, 255, 255), 2)
-                        
-                    if time_remaining <= 0: # Alarm is now activated 
-
-                        """
-                        For this part, we are essentially saying the alarm is activated.
-
-                        We have the following steps we need to ensure that is working: 
-
-                        1. The counter for intruders is on.
-                        2. The timer for any appearance of an intruder is on. (If exceeding 5 seconds, system alerts user).
-                        3. When the timer does exceed 5 seconds and intruders dissapear, the system will capture from when alarm is activated to 10 
-                           seconds after no intruders are detected.
-                        
-                        """
-
-                        global people_counter
-                        
-                        cv2.putText(annotated_frame, "Alarm Is Activated", (20, 300), cv2.FONT_HERSHEY_DUPLEX, 1, (255, 255, 255), 2)
-            
-                        people_counter = len(results[0].boxes) #counts number of boxes identified -> aka, number of intruders 
-
-                        cv2.putText(annotated_frame, f"Number of intruders detected: {people_counter}", (20, 600), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
-
-                        if people_counter > 0: 
-
-                            start_time = datetime.now().second
-
-                            cv2.putText(annotated_frame, f"Intruders have been present for: {start_time} seconds.", (20, 700), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
-
-                            if people_counter == 0:
-
-                                end_time = time.time()
-
-            
-                            
+                """
                 
+
+                We have the following steps we need to ensure that is working: 
+
+                1. The counter for intruders is on.
+                2. The timer for any appearance of an intruder is on. (If exceeding 5 seconds, system alerts user).
+                3. When the timer does exceed 5 seconds and intruders dissapear, the system will capture from when alarm is activated to 10 
+                    seconds after no intruders are detected.
+                
+                """
+
+                global people_counter
+    
+                people_counter = len(results[0].boxes) #counts number of boxes identified -> aka, number of intruders 
+
+                cv2.putText(annotated_frame, f"Number of intruders detected: {people_counter}", (20, 600), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
+
+                if people_counter > 0: 
+                    
+                    global intrusion_time
+
+                    intrusion_time = time.time()
+
+                    hours = int(intrusion_time // 3600)
+                    minutes = int((intrusion_time % 3600) // 60)
+                    seconds = int(intrusion_time % 60)
+                    
+                    cv2.putText(annotated_frame, f"Intruders have been present for: {hours:02d}:{minutes:02d}:{seconds:02d}.", (20, 700), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
+
+                if people_counter == 0:
+                    
+                    intrusion_time = 0.0
+
+                    cv2.putText(annotated_frame, f"Intruders are not present.", (20, 700), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
+
+            
                 cv2.putText(annotated_frame, str(current_datetime), (20, 500), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
 
                 recordedVideo.write(annotated_frame)
@@ -148,14 +138,8 @@ class LiveFeed():
                 if key == ord("q"):
                     
                     break
-
-                elif key == ord("s"): #start alarm 
                     
-                    alarm_started = True
-                    
-                    countdown = time.time() + DURATION
-                    
-                elif key == ord("e") and alarm_started:
+                elif key == ord("e"):
                     
                     self.email_system()
 
