@@ -5,6 +5,7 @@ from config import API_KEY
 from config import USER_EMAIL
 from courier import Courier
 from datetime import datetime 
+from collections import deque
 import time 
 
 
@@ -23,24 +24,26 @@ start_capturing = False
 
 frameWidth = int(video_path.get(cv2.CAP_PROP_FRAME_WIDTH))
 frameHeight = int(video_path.get(cv2.CAP_PROP_FRAME_HEIGHT))
-frameRate = int(video_path.get(cv2.CAP_PROP_FPS))
+frameRate = (video_path.get(cv2.CAP_PROP_FPS))
 
-if frameRate == 0 or frameRate is None:
-
-    frameRate = 30
-
-frameRate = float(frameRate)
 
 fourccCode = cv2.VideoWriter_fourcc(*'mp4v')
+
+recordedVideo = None 
 
 videoDimensions = (frameWidth, frameHeight)
 videoFileName = f"Video_Recorded_{datetime.now().strftime('%Y%m%d_%H%M%S')}.mp4"
 
-recordedVideo = cv2.VideoWriter(videoFileName,
-                            fourccCode,
-                            frameRate,
-                            videoDimensions)
+BUFFER_SECONDS = 30
+POST_EVENT_SECONDS = BUFFER_SECONDS #always equal 
 
+BUFFER_SIZE = BUFFER_SECONDS * int(frameRate)
+POST_EVENT_SIZE = BUFFER_SIZE # equal too 
+
+frame_buffer = deque(maxlen=BUFFER_SIZE)
+post_event_timer = 0 
+
+system_recording = False
 people_counter = 0
 intrusion_time = 0.0 
 end_time = 0.0 
@@ -84,6 +87,8 @@ class LiveFeed():
                 results = model.track(capture_frame, persist=True, classes=0) #classes = 0 for just people tracking. 
                 
                 annotated_frame = results[0].plot() 
+
+                frame_buffer.append(annotated_frame)
                 
                 global start_capturing
 
@@ -103,14 +108,16 @@ class LiveFeed():
                 """
 
                 global people_counter
+                global system_recording
+                global intrusion_time
+                global recordedVideo
+                global post_event_timer
     
                 people_counter = len(results[0].boxes) #counts number of boxes identified -> aka, number of intruders 
 
                 cv2.putText(annotated_frame, f"Number of intruders detected: {people_counter}", (20, 600), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
 
-                if people_counter > 0: 
-                    
-                    global intrusion_time
+                if people_counter > 0 and not system_recording: 
 
                     intrusion_time = time.time()
 
@@ -120,16 +127,34 @@ class LiveFeed():
                     
                     cv2.putText(annotated_frame, f"Intruders have been present for: {hours:02d}:{minutes:02d}:{seconds:02d}.", (20, 700), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
 
-                if people_counter == 0:
+                    recordedVideo = cv2.VideoWriter(videoFileName,
+                            fourccCode,
+                            frameRate,
+                            videoDimensions) # this activates the video writer --> starts to capture. 
+                    
+                    system_recording = True 
+                    
+                    for buffer_frame in frame_buffer: 
+
+                        recordedVideo.write(buffer_frame) # append the previous frames. 
+
+                    post_event_timer = POST_EVENT_SECONDS # now we record 30 seconds after. 
+
+                if people_counter == 0 and system_recording:
+
+                    recordedVideo.write(annotated_frame)
+                    post_event_timer -= 1
                     
                     intrusion_time = 0.0
 
                     cv2.putText(annotated_frame, f"Intruders are not present.", (20, 700), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
 
+                    if post_event_timer <= 0: 
+
+                        recordedVideo.release()
+
             
                 cv2.putText(annotated_frame, str(current_datetime), (20, 500), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
-
-                recordedVideo.write(annotated_frame)
                 
                 cv2.imshow(WINDOW_NAME, annotated_frame)
 
@@ -142,10 +167,6 @@ class LiveFeed():
                 elif key == ord("e"):
                     
                     self.email_system()
-
-                elif key == ord("c"):
-
-                    recordedVideo.release() # release means we stop recording. 
                                         
             else:
                 

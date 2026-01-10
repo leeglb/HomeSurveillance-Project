@@ -1,0 +1,33 @@
+Some notes for our project:
+
+
+
+
+So what do we want to actually implement or do?
+
+1. We know that currently our CCTV starts as soon as it opens.
+
+2. This is to reduce privacy issues.
+
+3. We track for individuals, which is counted on the bottom using a visual text display.
+
+4. Good, we track number of people.
+
+5. First off, we need to implement the capturing system. Right now it captures, but we want it to capture just the essentials.
+
+6. We can capture 10 seconds before and 10 seconds after someone is noticed. But for a real world situation we can choose duration length. 
+
+7. That covers capturing, we would just store this to a file where the date, time and location name is chosen by the user --> use f"{}"
+
+8. Emailing system is fine, we can see if we can email the video otherwise leave it as this could take alot of storage on someones phone.
+
+9. But for the email, we gotta think of the intervals we should email to notify. Perhaps if there is someone detected, we can wait 5 seconds to see if the person count goes back to 0, otherwise email every 2 minutes?
+
+
+As of tonight: 10/01/2026
+
+We have utilised a buffer to pretty much implement a first in first out. Now we need to
+fix the frame rate so that our output video matches the right speed and frame rate otherwise its too fast.
+Furthermore, we need to fix the datetime and etc. 
+We need to write about this in our notebook, and explain how we utilise a buffer and the theory behind it. 
+Try avoid AI from now on so we can actually learn a bit more. 
