@@ -41,3 +41,9 @@ But now we may have found the issues for the playback:
 2. we need to somehow make it so it still records regardless?
 3. logic rn is that if people dissapear, a 30 second timer elapses and records it all. But if anyone pops back in, then it resets it. 
 4. add a flag to let the system know that it has detected someone? dont reset anything? 
+
+5. okay we now know how --> add another time for 10-30 seconds after, then we can shutoff (release).
+6. The issue was that the -= 1 for post timer event was so fast also our if condition (if people <= 0 and recording) was not good. 
+
+7. Where are we at now? Add logging text also implement email logic? Maybe add it so it emails when the clip ends too? 
+8. Also one issue, what happens if they keep popping back and forth? How will the system handle that? 

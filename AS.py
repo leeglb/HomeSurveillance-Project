@@ -26,7 +26,7 @@ start_capturing = False
 
 frameWidth = int(video_path.get(cv2.CAP_PROP_FRAME_WIDTH))
 frameHeight = int(video_path.get(cv2.CAP_PROP_FRAME_HEIGHT))
-frameRate =  30 # (video_path.get(cv2.CAP_PROP_FPS))
+frameRate =  (video_path.get(cv2.CAP_PROP_FPS))
 
 fourccCode = cv2.VideoWriter_fourcc(*'mp4v')
 
@@ -44,7 +44,7 @@ BUFFER_SIZE = BUFFER_SECONDS * int(frameRate)
 POST_EVENT_SIZE = BUFFER_SIZE # equal too 
 
 frame_buffer = deque(maxlen=BUFFER_SIZE)
-post_event_timer = 0 
+post_event_timer = 10 
 
 # Timers & Countdowns ---------------------
 
@@ -161,13 +161,13 @@ class LiveFeed():
 
                         if people_counter > 0 and not system_recording: 
 
-                            intrusion_time = time.time()
+                            #intrusion_time = time.time()
 
-                            hours = int(intrusion_time // 3600)
-                            minutes = int((intrusion_time % 3600) // 60)
-                            seconds = int(intrusion_time % 60)
+                            #hours = int(intrusion_time // 3600)
+                            #minutes = int((intrusion_time % 3600) // 60)
+                            #seconds = int(intrusion_time % 60)
                             
-                            cv2.putText(annotated_frame, f"Intruders have been present for: {hours:02d}:{minutes:02d}:{seconds:02d}.", (20, 700), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
+                            #cv2.putText(annotated_frame, f"Intruders have been present for: {hours:02d}:{minutes:02d}:{seconds:02d}.", (20, 700), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
 
                             recordedVideo = cv2.VideoWriter(videoFileName,
                                     fourccCode,
@@ -180,20 +180,23 @@ class LiveFeed():
 
                                 recordedVideo.write(buffer_frame) # append the previous frames. 
 
-                            post_event_timer = POST_EVENT_SECONDS # now we record 30 seconds after. 
-
-                        if people_counter == 0 and system_recording:
+                        if system_recording:
 
                             recordedVideo.write(annotated_frame)
-                            post_event_timer -= 1
-                            
-                            intrusion_time = 0.0
 
-                            cv2.putText(annotated_frame, f"Intruders are not present.", (20, 700), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
-
-                            if post_event_timer <= 0: 
-
-                                recordedVideo.release()
+                            if people_counter == 0: 
+                                
+                                post_event_timer = int(10 - time.time())
+                                
+                                if post_event_timer == 0: 
+                                    
+                                    recordedVideo.release()
+                                    
+                                    system_recording = False # no longer capturing. 
+                                
+                                cv2.putText(annotated_frame, f"Intruders are not present.", (20, 700), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
+                                
+                                cv2.putText(result_frame, str(current_datetime), (20, 500), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
             
                 cv2.putText(result_frame, str(current_datetime), (20, 500), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
                 
