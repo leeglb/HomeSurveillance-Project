@@ -31,3 +31,13 @@ fix the frame rate so that our output video matches the right speed and frame ra
 Furthermore, we need to fix the datetime and etc. 
 We need to write about this in our notebook, and explain how we utilise a buffer and the theory behind it. 
 Try avoid AI from now on so we can actually learn a bit more. 
+
+13/01/2026:
+
+We implemented a countdown and for system activation as this is better, giving users more time to leave the property etc.
+But now we may have found the issues for the playback:
+
+1. only when people_counter == 0, do we write to the video writer. (I think its only recording first instance of intruder).
+2. we need to somehow make it so it still records regardless?
+3. logic rn is that if people dissapear, a 30 second timer elapses and records it all. But if anyone pops back in, then it resets it. 
+4. add a flag to let the system know that it has detected someone? dont reset anything? 
