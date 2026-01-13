@@ -47,3 +47,4 @@ But now we may have found the issues for the playback:
 
 7. Where are we at now? Add logging text also implement email logic? Maybe add it so it emails when the clip ends too? 
 8. Also one issue, what happens if they keep popping back and forth? How will the system handle that? 
+9. So email + new people identified will be found every 30 seconds. 

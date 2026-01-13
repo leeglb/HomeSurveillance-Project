@@ -49,7 +49,7 @@ post_event_timer = 10
 # Timers & Countdowns ---------------------
 
 system_recording = False
-people_counter = 0
+intruder_count = 0
 intrusion_time = 0.0 
 end_time = 0.0 
 
@@ -71,6 +71,10 @@ WINDOW_NAME = "Monitoring System"
 class LiveFeed():
 
     def email_system(self):
+        
+        now = datetime.now()
+            
+        current_datetime = now.strftime("%Y-%m-%d %H:%M:%S")
 
         response = client.send.message(
             message = { 
@@ -80,7 +84,7 @@ class LiveFeed():
 
             "content": { 
                 "title": "Home Surveillance Alert",
-                "body": f"The System Has Detected {people_counter} Intruders"
+                "body": f"The System Has Detected {intruder_count} Intruders At {current_datetime}"
             },
 
             "routing": {
@@ -94,7 +98,9 @@ class LiveFeed():
 
         while(True): 
             
-            current_datetime = datetime.now()
+            now = datetime.now()
+            
+            current_datetime = now.strftime("%Y-%m-%d %H:%M:%S")
             
             boolean_ret, capture_frame = video_path.read()
             
@@ -138,28 +144,25 @@ class LiveFeed():
                             
 
                         """
-                        
-
                         We have the following steps we need to ensure that is working: 
 
                         1. The counter for intruders is on.
                         2. The timer for any appearance of an intruder is on. (If exceeding 5 seconds, system alerts user).
                         3. When the timer does exceed 5 seconds and intruders dissapear, the system will capture from 
                             when alarm is activated to 10 seconds after no intruders are detected.
-                        
                         """
 
-                        global people_counter
+                        global intruder_count
                         global system_recording
                         global intrusion_time
                         global recordedVideo
                         global post_event_timer
             
-                        people_counter = len(results[0].boxes) #counts number of boxes identified -> aka, number of intruders 
+                        intruder_count = len(results[0].boxes) #counts number of boxes identified -> aka, number of intruders 
 
-                        cv2.putText(annotated_frame, f"Number of intruders detected: {people_counter}", (20, 600), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
+                        cv2.putText(annotated_frame, f"Number of intruders detected: {intruder_count}", (20, 600), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
 
-                        if people_counter > 0 and not system_recording: 
+                        if intruder_count > 0 and not system_recording: 
 
                             #intrusion_time = time.time()
 
@@ -179,12 +182,36 @@ class LiveFeed():
                             for buffer_frame in frame_buffer: 
 
                                 recordedVideo.write(buffer_frame) # append the previous frames. 
+                                
+                            self.email_system() # email system will reset every 30 seconds following the capturing time. 
+                            
+                            # File Writing ---------
+                            
+                            file_path = "logbook.txt"
+                            
+                            file_content = ""
+                            
+                            if intruder_count == 1: 
+                                
+                                file_content = f"1 Intruder Detected At {current_datetime}.\n"
+                                
+                                with open(file_path, 'a') as file: 
+                                
+                                    file.write(file_content)
+                                
+                            elif intruder_count > 1: 
+                            
+                                file_content = f"{intruder_count} Intruders Detected At {current_datetime}.\n"
+                                
+                                with open(file_path, 'a') as file: 
+                                    
+                                    file.write(file_content)
 
                         if system_recording:
 
                             recordedVideo.write(annotated_frame)
 
-                            if people_counter == 0: 
+                            if intruder_count == 0: 
                                 
                                 post_event_timer = int(10 - time.time())
                                 
