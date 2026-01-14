@@ -57,6 +57,11 @@ DURATION = 10
 
 countdown = 0
 
+# Email Variables -------------------------
+
+email_cooldown = 10 # subject to change depending on real world application (i.e 150-300)
+email_sent = False
+
 # System Boolean | Window Name | Final Frame 
 
 result_frame = None
@@ -157,6 +162,7 @@ class LiveFeed():
                         global intrusion_time
                         global recordedVideo
                         global post_event_timer
+                        global email_sent
             
                         intruder_count = len(results[0].boxes) #counts number of boxes identified -> aka, number of intruders 
 
@@ -183,7 +189,15 @@ class LiveFeed():
 
                                 recordedVideo.write(buffer_frame) # append the previous frames. 
                                 
-                            self.email_system() # email system will reset every 30 seconds following the capturing time. 
+                            email_time = int((email_cooldown + time.time()) - time.time())
+
+                            if email_time <= 0 and not(email_sent):
+
+                                self.email_system()
+
+                                email_sent = True 
+
+
                             
                             # File Writing ---------
                             
