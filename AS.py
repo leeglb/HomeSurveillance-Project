@@ -9,11 +9,17 @@ from collections import deque
 import time 
 
 
+
+
+
 # API Key & ML Model -------------------------
 
 client = Courier(api_key = API_KEY)
 
 model = YOLO("yolo11n.pt") #pretrained model 
+
+
+
 
 # Video Path & Parameters --------------------
 
@@ -35,6 +41,10 @@ recordedVideo = None
 videoDimensions = (frameWidth, frameHeight)
 videoFileName = f"Video_Recorded_{datetime.now().strftime('%Y%m%d_%H%M%S')}.mp4"
 
+
+
+
+
 # Buffer Queue Parameters ------------------
 
 BUFFER_SECONDS = 30
@@ -45,6 +55,9 @@ POST_EVENT_SIZE = BUFFER_SIZE # equal too
 
 frame_buffer = deque(maxlen=BUFFER_SIZE)
 post_event_timer = 10 
+
+
+
 
 # Timers & Countdowns ---------------------
 
@@ -57,10 +70,16 @@ DURATION = 10
 
 countdown = 0
 
+
+
+
 # Email Variables -------------------------
 
 email_cooldown = 10 # subject to change depending on real world application (i.e 150-300)
 email_sent = False
+
+
+
 
 # System Boolean | Window Name | Final Frame 
 
