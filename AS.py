@@ -75,7 +75,7 @@ countdown = 0
 
 # Email Variables -------------------------
 
-email_cooldown = 10 # subject to change depending on real world application (i.e 150-300)
+email_cooldown = 5 # subject to change depending on real world application (i.e 150-300)
 email_sent = False
 
 
@@ -152,7 +152,7 @@ class LiveFeed():
 
                         cv2.putText(capture_frame, f"Countdown to alarm activation: {time_remaining}", (20, 300), cv2.FONT_HERSHEY_DUPLEX, 1, (255, 255, 255), 2) 
 
-                    if time_remaining <= 0: 
+                    if time_remaining < 0: # not <= since both cv2.putText will display at 0 seconds. 
 
                         global start_capturing
                     
@@ -172,8 +172,8 @@ class LiveFeed():
 
                         1. The counter for intruders is on.
                         2. The timer for any appearance of an intruder is on. (If exceeding 5 seconds, system alerts user).
-                        3. When the timer does exceed 5 seconds and intruders dissapear, the system will capture from 
-                            when alarm is activated to 10 seconds after no intruders are detected.
+                        3. When the timer does exceed x seconds and intruders dissapear, the system will capture from 
+                            when alarm is activated to x seconds after no intruders are detected.
                         """
 
                         global intruder_count
@@ -208,13 +208,19 @@ class LiveFeed():
 
                                 recordedVideo.write(buffer_frame) # append the previous frames. 
                                 
-                            email_time = int((email_cooldown + time.time()) - time.time())
+                            email_cooldown = 10 + time.time()
+                                
+                            email_time = int((email_cooldown) - time.time())
+                            
+                            print(email_time)
 
                             if email_time <= 0 and not(email_sent):
 
                                 self.email_system()
 
                                 email_sent = True 
+                                
+                                print("email sent")
 
 
                             
