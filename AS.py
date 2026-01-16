@@ -62,21 +62,20 @@ post_event_timer = 10
 # Timers & Countdowns ---------------------
 
 system_recording = False
+
 intruder_count = 0
+
 intrusion_time = 0.0 
+
 end_time = 0.0 
 
 DURATION = 10
 
+EMAIL_COOLDOWN = 10  # subject to change depending on real world application (i.e 150-300)
+
 countdown = 0
 
-
-
-
-# Email Variables -------------------------
-
-email_cooldown = 5 # subject to change depending on real world application (i.e 150-300)
-email_sent = False
+email_countdown = 0
 
 
 
@@ -86,6 +85,10 @@ email_sent = False
 result_frame = None
 
 system_activated = False 
+
+intruder_found = False 
+
+email_sent = False
 
 WINDOW_NAME = "Monitoring System" 
 
@@ -100,6 +103,8 @@ class LiveFeed():
             
         current_datetime = now.strftime("%Y-%m-%d %H:%M:%S")
 
+        intruder_plural = "Intruder" if intruder_count == 1 else "Intruders"
+
         response = client.send.message(
             message = { 
             "to": { 
@@ -108,7 +113,7 @@ class LiveFeed():
 
             "content": { 
                 "title": "Home Surveillance Alert",
-                "body": f"The System Has Detected {intruder_count} Intruders At {current_datetime}"
+                "body": f"The System Has Detected {intruder_count} {intruder_plural} At {current_datetime}"
             },
 
             "routing": {
@@ -141,6 +146,7 @@ class LiveFeed():
                 global countdown
                 global system_activated
                 global result_frame
+                global intruder_found
 
                 result_frame = capture_frame # result frame is the final frame we will display. 
 
@@ -189,6 +195,8 @@ class LiveFeed():
 
                         if intruder_count > 0 and not system_recording: 
 
+                            intruder_found = True 
+
                             #intrusion_time = time.time()
 
                             #hours = int(intrusion_time // 3600)
@@ -207,21 +215,6 @@ class LiveFeed():
                             for buffer_frame in frame_buffer: 
 
                                 recordedVideo.write(buffer_frame) # append the previous frames. 
-                                
-                            email_cooldown = 10 + time.time()
-                                
-                            email_time = int((email_cooldown) - time.time())
-                            
-                            print(email_time)
-
-                            if email_time <= 0 and not(email_sent):
-
-                                self.email_system()
-
-                                email_sent = True 
-                                
-                                print("email sent")
-
 
                             
                             # File Writing ---------
@@ -246,11 +239,15 @@ class LiveFeed():
                                     
                                     file.write(file_content)
 
-                        if system_recording:
+
+            
+                        elif system_recording:
 
                             recordedVideo.write(annotated_frame)
 
                             if intruder_count == 0: 
+
+                                intruder_found = False 
                                 
                                 post_event_timer = int(10 - time.time())
                                 
@@ -263,6 +260,26 @@ class LiveFeed():
                                 cv2.putText(annotated_frame, f"Intruders are not present.", (20, 700), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
                                 
                                 cv2.putText(result_frame, str(current_datetime), (20, 500), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
+
+
+                        if intruder_found: 
+        
+                                cv2.putText(result_frame, "Alert Sent", (20, 150), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
+
+                                self.email_system()
+
+                                email_sent = True 
+
+                                with open(file_path, 'a') as file: 
+                                    
+                                        file.write(f"Alert Sent At {current_datetime}.\n")
+
+
+                        elif intruder_count == 0:
+
+                            intruder_found = False 
+                            
+
             
                 cv2.putText(result_frame, str(current_datetime), (20, 500), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
                 
