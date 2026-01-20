@@ -47,8 +47,8 @@ videoFileName = f"Video_Recorded_{datetime.now().strftime('%Y%m%d_%H%M%S')}.mp4"
 
 # Buffer Queue Parameters ------------------
 
-BUFFER_SECONDS = 30
-POST_EVENT_SECONDS = BUFFER_SECONDS #always equal 
+BUFFER_SECONDS = 15
+POST_EVENT_SECONDS = 15 #always equal 
 
 BUFFER_SIZE = BUFFER_SECONDS * int(frameRate)
 POST_EVENT_SIZE = BUFFER_SIZE # equal too 
@@ -74,10 +74,12 @@ EMAIL_COOLDOWN = 10  # subject to change depending on real world application (i.
 
 countdown = 0
 
-email_countdown = 0
+post_event_countdown = 0
 
+post_event_flag = False 
 post_event_timer = 0.0
 
+previous_intruder_count = 0 
 
 
 
@@ -87,7 +89,7 @@ result_frame = None
 
 system_activated = False 
 
-intruder_found = False 
+first_presence = False # First presence detected. --> Kicks the system into alert. 
 
 email_sent = False
 
@@ -97,6 +99,9 @@ WINDOW_NAME = "Monitoring System"
 
 
 class LiveFeed():
+    
+    def __init__(self) -> None:
+         pass # for now
 
     def email_system(self):
         
@@ -124,7 +129,7 @@ class LiveFeed():
             }
         )
 
-    def main_function(self):
+    def main_function(self):   
 
         while(True): 
             
@@ -147,7 +152,6 @@ class LiveFeed():
                 global countdown
                 global system_activated
                 global result_frame
-                global intruder_found
 
                 result_frame = capture_frame # result frame is the final frame we will display. 
 
@@ -172,7 +176,7 @@ class LiveFeed():
                         frame_buffer.append(annotated_frame)
 
                         cv2.putText(annotated_frame, "Monitoring System Is Now Activated", (20, 300), cv2.FONT_HERSHEY_DUPLEX, 1, (255, 255, 255), 2)
-                            
+                        
 
                         """
                         We have the following steps we need to ensure that is working: 
@@ -189,14 +193,23 @@ class LiveFeed():
                         global recordedVideo
                         global post_event_timer
                         global email_sent
+                        global post_event_flag
+                        global post_event_countdown
+                        global previous_intruder_count
+                        global first_presence
             
                         intruder_count = len(results[0].boxes) #counts number of boxes identified -> aka, number of intruders 
-
+                        
+                        intruder_not_present = intruder_count == 0 and previous_intruder_count > 0
+                        intruder_currently_present = intruder_count > 0 and previous_intruder_count == 0
+                        
                         cv2.putText(annotated_frame, f"Number of intruders detected: {intruder_count}", (20, 600), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
 
                         if intruder_count > 0 and not system_recording: 
 
-                            intruder_found = True 
+                            first_presence = True 
+                            
+                            post_event_flag = False 
 
                             #intrusion_time = time.time()
 
@@ -256,7 +269,7 @@ class LiveFeed():
                             
                             """
 
-                            self.email_system()
+                            #self.email_system()
 
                             email_sent = True 
 
@@ -264,41 +277,36 @@ class LiveFeed():
                                 
                                     file.write(f"Alert Sent At {current_datetime}.\n")
                                     
-
-                        # if the intruder count is 0, maybe do a timer where it counts down for 10 seconds? then it closes the recording? 
-                        
-                        cv2.putText(annotated_frame, str(post_event_timer) + " current time", (20, 450), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
-            
-                        if system_recording:
-
+                        if intruder_not_present and first_presence:
+                            
+                            post_event_flag = True 
+                            
+                            post_event_timer = time.time()
+                            
+                            cv2.putText(annotated_frame, f"Intruders are not present.", (20, 700), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
+                            
+                        if post_event_flag:
+                            
                             recordedVideo.write(annotated_frame) 
                             
-                            if intruder_count == 0: 
-                                
-                                pass
+                            post_event_countdown = int(time.time() - post_event_timer)
                             
-                                
-                                if post_event_timer - time.time() >= 0: 
-                                    
-                                    pass
-                                    
-                                    #cv2.putText(annotated_frame, str(post_event_timer) + " post_event_timer", (20, 400), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
-                                
-                                    #cv2.putText(annotated_frame, str(time.time()) + " current time", (20, 450), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
-                                    
-                                if post_event_timer - time.time() <= 0:
-                                    
-                                    recordedVideo.release()
-                                    
-                                    system_recording = False # no longer capturing. 
-                                
-                                cv2.putText(annotated_frame, f"Intruders are not present.", (20, 700), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
+                            time_since_dissappearance = 15 - post_event_countdown
                             
-                                cv2.putText(annotated_frame, str(current_datetime), (20, 500), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
+                            cv2.putText(annotated_frame, str(time_since_dissappearance), (20, 400), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
+                            
+                            if time_since_dissappearance <= 0: 
+                                
+                                post_event_flag = False 
+                                
+                                system_recording = False 
+                                
+                                recordedVideo.release()
+                                
+                            
+                        previous_intruder_count = intruder_count
 
-
-                        
-
+                      
             
                 cv2.putText(result_frame, str(current_datetime), (20, 500), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
                 
@@ -311,12 +319,17 @@ class LiveFeed():
                     break
 
                 elif key == ord("s"):
-
-                    countdown = time.time() + DURATION
-
-                    system_activated = True 
                     
-                    
+                    if system_activated:
+                        
+                        pass
+
+                    else:
+                        
+                        countdown = time.time() + DURATION
+
+                        system_activated = True 
+                        
                                         
             else:
                 
