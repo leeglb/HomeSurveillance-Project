@@ -54,7 +54,6 @@ BUFFER_SIZE = BUFFER_SECONDS * int(frameRate)
 POST_EVENT_SIZE = BUFFER_SIZE # equal too 
 
 frame_buffer = deque(maxlen=BUFFER_SIZE)
-post_event_timer = 10 
 
 
 
@@ -76,6 +75,8 @@ EMAIL_COOLDOWN = 10  # subject to change depending on real world application (i.
 countdown = 0
 
 email_countdown = 0
+
+post_event_timer = 0.0
 
 
 
@@ -238,47 +239,65 @@ class LiveFeed():
                                 with open(file_path, 'a') as file: 
                                     
                                     file.write(file_content)
+                                    
+                            # Email Sending -------
+                            
+                            """
+                            1.For our email system, we have already created the email function above the main function.
+                            
+                            2. The email system will activate only if an intruder is detected. As a result, we follow 
+                            the current if loop, allowing us to have a cooldown period. 
+                            
+                            3. If an intruder constantly appears, this will cause the system to spam ping the user.
+                            
+                            4. To avoid this, we allow the system to wait for the post even timer to finish.
+                            
+                            5. When the email is sent, we will also send a log to the logbook to record intrusion alerts. 
+                            
+                            """
 
+                            self.email_system()
 
+                            email_sent = True 
+
+                            with open(file_path, 'a') as file: 
+                                
+                                    file.write(f"Alert Sent At {current_datetime}.\n")
+                                    
+
+                        # if the intruder count is 0, maybe do a timer where it counts down for 10 seconds? then it closes the recording? 
+                        
+                        cv2.putText(annotated_frame, str(post_event_timer) + " current time", (20, 450), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
             
-                        elif system_recording:
+                        if system_recording:
 
-                            recordedVideo.write(annotated_frame)
-
+                            recordedVideo.write(annotated_frame) 
+                            
                             if intruder_count == 0: 
-
-                                intruder_found = False 
                                 
-                                post_event_timer = int(10 - time.time())
+                                pass
+                            
                                 
-                                if post_event_timer == 0: 
+                                if post_event_timer - time.time() >= 0: 
+                                    
+                                    pass
+                                    
+                                    #cv2.putText(annotated_frame, str(post_event_timer) + " post_event_timer", (20, 400), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
+                                
+                                    #cv2.putText(annotated_frame, str(time.time()) + " current time", (20, 450), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
+                                    
+                                if post_event_timer - time.time() <= 0:
                                     
                                     recordedVideo.release()
                                     
                                     system_recording = False # no longer capturing. 
                                 
                                 cv2.putText(annotated_frame, f"Intruders are not present.", (20, 700), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
-                                
-                                cv2.putText(result_frame, str(current_datetime), (20, 500), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
-
-
-                        if intruder_found: 
-        
-                                cv2.putText(result_frame, "Alert Sent", (20, 150), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
-
-                                self.email_system()
-
-                                email_sent = True 
-
-                                with open(file_path, 'a') as file: 
-                                    
-                                        file.write(f"Alert Sent At {current_datetime}.\n")
-
-
-                        elif intruder_count == 0:
-
-                            intruder_found = False 
                             
+                                cv2.putText(annotated_frame, str(current_datetime), (20, 500), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
+
+
+                        
 
             
                 cv2.putText(result_frame, str(current_datetime), (20, 500), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
@@ -297,14 +316,12 @@ class LiveFeed():
 
                     system_activated = True 
                     
-                elif key == ord("e"):
                     
-                    self.email_system()
                                         
             else:
                 
                 break
-        
+            
 
         video_path.release()
         cv2.destroyAllWindows()
