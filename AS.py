@@ -1,3 +1,5 @@
+
+
 import cv2
 
 from ultralytics import YOLO
@@ -28,8 +30,6 @@ video_path = cv2.VideoCapture(0)
 video_path.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
 video_path.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 
-start_capturing = False 
-
 frameWidth = int(video_path.get(cv2.CAP_PROP_FRAME_WIDTH))
 frameHeight = int(video_path.get(cv2.CAP_PROP_FRAME_HEIGHT))
 frameRate =  (video_path.get(cv2.CAP_PROP_FPS))
@@ -39,7 +39,7 @@ fourccCode = cv2.VideoWriter_fourcc(*'mp4v')
 recordedVideo = None 
 
 videoDimensions = (frameWidth, frameHeight)
-videoFileName = f"Video_Recorded_{datetime.now().strftime('%Y%m%d_%H%M%S')}.mp4"
+videoFileName = ""
 
 
 
@@ -152,6 +152,7 @@ class LiveFeed():
                 global countdown
                 global system_activated
                 global result_frame
+                global videoFileName
 
                 result_frame = capture_frame # result frame is the final frame we will display. 
 
@@ -164,8 +165,6 @@ class LiveFeed():
                         cv2.putText(capture_frame, f"Countdown to alarm activation: {time_remaining}", (20, 300), cv2.FONT_HERSHEY_DUPLEX, 1, (255, 255, 255), 2) 
 
                     if time_remaining < 0: # not <= since both cv2.putText will display at 0 seconds. 
-
-                        global start_capturing
                     
                         results = model.track(capture_frame, persist=True, classes=0) #classes = 0 for just people tracking. 
                         
@@ -200,12 +199,11 @@ class LiveFeed():
             
                         intruder_count = len(results[0].boxes) #counts number of boxes identified -> aka, number of intruders 
                         
-                        intruder_not_present = intruder_count == 0 and previous_intruder_count > 0
-                        intruder_currently_present = intruder_count > 0 and previous_intruder_count == 0
-                        
                         cv2.putText(annotated_frame, f"Number of intruders detected: {intruder_count}", (20, 600), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
 
-                        if intruder_count > 0 and not system_recording: 
+                        if (intruder_count > 0) and (system_recording == False): 
+
+                            previous_intruder_count = intruder_count
 
                             first_presence = True 
                             
@@ -218,6 +216,8 @@ class LiveFeed():
                             #seconds = int(intrusion_time % 60)
                             
                             #cv2.putText(annotated_frame, f"Intruders have been present for: {hours:02d}:{minutes:02d}:{seconds:02d}.", (20, 700), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
+
+                            videoFileName = f"Video_Recorded_{datetime.now().strftime('%Y%m%d_%H%M%S')}.mp4"
 
                             recordedVideo = cv2.VideoWriter(videoFileName,
                                     fourccCode,
@@ -276,8 +276,14 @@ class LiveFeed():
                             with open(file_path, 'a') as file: 
                                 
                                     file.write(f"Alert Sent At {current_datetime}.\n")
+                        
+                        intruder_not_present = intruder_count == 0 and previous_intruder_count > 0
+                        # intruder_currently_present = intruder_count > 0 and previous_intruder_count == 0
+
+                        cv2.putText(annotated_frame, f"Intruders not present: " + str(intruder_not_present), (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
+                        cv2.putText(annotated_frame, "Previous intruder count: " + str(previous_intruder_count), (20, 80), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
                                     
-                        if intruder_not_present and first_presence:
+                        if intruder_not_present and not post_event_flag:
                             
                             post_event_flag = True 
                             
@@ -291,7 +297,7 @@ class LiveFeed():
                             
                             post_event_countdown = int(time.time() - post_event_timer)
                             
-                            time_since_dissappearance = 15 - post_event_countdown
+                            time_since_dissappearance = POST_EVENT_SECONDS - post_event_countdown
                             
                             cv2.putText(annotated_frame, str(time_since_dissappearance), (20, 400), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
                             
@@ -300,13 +306,20 @@ class LiveFeed():
                                 post_event_flag = False 
                                 
                                 system_recording = False 
+
+                                email_sent = False 
+
+                                first_presence = False 
+
+                                previous_intruder_count = 0
                                 
                                 recordedVideo.release()
-                                
-                            
-                        previous_intruder_count = intruder_count
 
-                      
+                                frame_buffer.clear()
+                
+                                
+
+    
             
                 cv2.putText(result_frame, str(current_datetime), (20, 500), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
                 
