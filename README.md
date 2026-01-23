@@ -19,7 +19,6 @@ for this sector.
 ---
 
 
-
 <h3> Prerequisites (System Capturing File): </h3>
 
 1. Ultralytics: YOLO (Tracking Software)
@@ -114,6 +113,22 @@ API_KEY = os.getenv("COURIER_API_KEY")
 USER_EMAIL = os.getenv("EMAIL")
 ```
 
+
+
+---
+
+
+<h3> Docker Download Alternative </h3>
+
+```
+docker build -t surveillanceproject
+```
+
+<i> Please ensure your API keys are all set up and your .env file is all good to go. </i>
+
+```
+docker run surveillanceproject
+```
 
 
 ---
