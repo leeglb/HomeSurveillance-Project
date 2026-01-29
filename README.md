@@ -3,7 +3,7 @@
 
 
 
-<h2> The aim of the project: </h2>
+<h2> The aim of the project 🖥️: </h2>
 
 The aim of this project is to create a monitoring system
 for home surveillance with the capabilities of direct, live contact
@@ -19,7 +19,7 @@ for this sector.
 ---
 
 
-<h3> Prerequisites (System Capturing File): </h3>
+<h3> Prerequisites (System Capturing File) 📂: </h3>
 
 1. Ultralytics: YOLO (Tracking Software)
 
@@ -27,7 +27,7 @@ for this sector.
 pip install -U ultralytics
 ```
 
-2. Courier: (Email / SMS Service)
+2. Courier 📧: (Email / SMS Service)
 
 <i> Link is provided for setup </i>: https://www.courier.com/
 
@@ -60,7 +60,7 @@ pip install dotenv
 
 
 
-<h3> Prerequisites (Jupyter Notebook File): </h3>
+<h3> Prerequisites (Jupyter Notebook File) 📂: </h3>
 
 1. Pandas:
 
@@ -86,7 +86,7 @@ pip install -U statsmodels==0.14.4 scipy==1.14.1
 
 
 
-<h3> Config File & .env File: </h3>
+<h3> Config File & .env File 📂: </h3>
 
 1. Create a .env file which will contain both:
 
@@ -118,7 +118,7 @@ USER_EMAIL = os.getenv("EMAIL")
 ---
 
 
-<h3> Docker Download Alternative </h3>
+<h3> Docker Download Alternative 🗃️:</h3>
 
 ```
 docker build -t surveillanceproject
@@ -135,7 +135,7 @@ docker run surveillanceproject
 
 
 
-<h3> Why am I making this project? </h3>
+<h3> Why am I making this project? ✏️</h3>
 
 Whilst the project is nothing over the top, the importance of learning how to utilise prexisting tools,
 particularly in the field of machine learning and camera operation is important. OpenCV is an extensive tool for image and 
