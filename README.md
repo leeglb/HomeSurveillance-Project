@@ -1,109 +1,143 @@
-<h1> Surveillance System - Using Object Detection </h1>
+# ML Integrated - Surveillance System
+### Real-Time Object Detection + Instant Alerts + Crime Forecasting
 
+> What if your camera could detect suspicious activity  
+> and notify you instantly?
 
-
-
-<h2> The aim of the project 🖥️: </h2>
-
-The aim of this project is to create a monitoring system
-for home surveillance with the capabilities of direct, live contact
-when intruders are detected.
-
-In the day and age where machine learning and artifical intelligence
-is utilised to track & monitor for targetted individuals and tracking,
-it is pivotal to understand the key technology and current software 
-for this sector. 
-
-
+This project combines **YOLOv8 object detection**, **OpenCV live capture**, **Courier alerting (Email/SMS)**, and **ARIMA crime forecasting** into one integrated surveillance pipeline.
 
 ---
 
+## So what does our system do? 
 
-<h3> Prerequisites (System Capturing File) 📂: </h3>
+When the system detects an object:
 
-1. Ultralytics: YOLO (Tracking Software)
+1. YOLOv8 identifies the object in real time  
+2. OpenCV captures the frame  
+3. A timestamp is logged  
+4. An alert is sent via Courier  
 
+## And what about the forecasting?
+
+1. ARIMA/ARIMAX model forecasts future crime trends.
+2. Leverage these insights into creating a product.
+
+---
+
+## System Architecture
+
+```mermaid
+flowchart TD
+    A[Camera Feed] --> B[YOLO Detection]
+    B --> C[Capture Frame]
+    C --> D[Send Alert via Courier]
+    C --> E[Store Timestamp Data]
 ```
+
+---
+
+## 💡 Why I Built This
+
+I wanted to understand:
+
+> How do we go from a simple idea  
+> to something that actually feels like a product?
+
+I didn't want to create another tutorial project, rather: 
+
+I focused on:
+- Integrating powerful existing tools correctly
+- Managing environment variables securely
+- Connecting real-time detection to real-world alerts
+- Supporting the concept with data forecasting (ARIMA)
+
+---
+
+# Installation & Setup
+
+---
+
+## System Capture Dependencies
+
+<details>
+<summary>Click to expand</summary>
+
+### 1️⃣ YOLO (Ultralytics)
+```bash
 pip install -U ultralytics
 ```
 
-2. Courier 📧: (Email / SMS Service)
+### 2️⃣ Courier (Email / SMS Alerts)
+Create an account at: https://www.courier.com/
 
-<i> Link is provided for setup </i>: https://www.courier.com/
-
-``` 
+```bash
 pip install trycourier
 ```
 
-3. OpenCV: (Capturing System)
-
-```
+### 3️⃣ OpenCV (Camera Capture)
+```bash
 pip install opencv-contrib-python
 ```
 
-4. Some modules to import into our main file:
-
+### 4️⃣ dotenv (Environment Variables)
+```bash
+pip install python-dotenv
 ```
+
+### 5️⃣ Built-in Modules
+```python
 from datetime import datetime
 import time
 ```
 
-5. dotenv
-
-``` 
-pip install dotenv
-```
-
-
+</details>
 
 ---
 
+## Jupyter Notebook Dependencies (Crime Forecasting)
 
+<details>
+<summary>Click to expand</summary>
 
-<h3> Prerequisites (Jupyter Notebook File) 📂: </h3>
-
-1. Pandas:
-
-```
+### Pandas
+```bash
 pip install pandas
 ```
 
-2. Matplotlib:
-
+### Matplotlib
+```bash
+pip install matplotlib
 ```
-pip install Matplotlib
-```
 
-3. StatsModels:
-
-``` 
+### StatsModels (ARIMA)
+```bash
 pip install -U statsmodels==0.14.4 scipy==1.14.1
 ```
 
-
+</details>
 
 ---
 
+# Environment Configuration
 
+## Step 1: Create a `.env` file
 
-<h3> Config File & .env File 📂: </h3>
-
-1. Create a .env file which will contain both:
-
-```
-COURIER_API_KEY = 'YOUR_API_KEY'
-
-EMAIL = 'YOUR_EMAIL_HERE'
+```env
+COURIER_API_KEY=your_api_key_here
+EMAIL=your_email_here
 ```
 
-Essentially, your .env file is a plain text file utilised to store our environment variables (particularly API keys), 
-seperate from our application source code. (Hides important info pretty much.)
+Why use a `.env` file?
 
-2. Create a config.py file (In Source Code Already):
+- Keeps API keys secure  
+- Prevents accidental GitHub exposure  
+- Separates configuration from source code  
 
-<i> config.py </i>
+---
 
-```
+## Step 2: config.py (Included in Source)
+
+```python
 from dotenv import load_dotenv
 import os 
 
@@ -113,42 +147,52 @@ API_KEY = os.getenv("COURIER_API_KEY")
 USER_EMAIL = os.getenv("EMAIL")
 ```
 
-
-
 ---
 
+# Run with Docker (Quick Start)
 
-<h3> Docker Download Alternative 🗃️:</h3>
-
-```
-docker build -t surveillanceproject
-```
-
-<i> Please ensure your API keys are all set up and your .env file is all good to go. </i>
-
-```
+```bash
+docker build -t surveillanceproject .
 docker run surveillanceproject
 ```
 
+⚠️ Ensure your `.env` file is properly configured before running.
 
 ---
 
+# Crime Forecasting with ARIMA
 
+<details>
+<summary>Why forecasting?</summary>
 
-<h3> Why am I making this project? ✏️</h3>
+Using an ARIMA model, I analysed Australian crime data to predict future trends.
 
-Whilst the project is nothing over the top, the importance of learning how to utilise prexisting tools,
-particularly in the field of machine learning and camera operation is important. OpenCV is an extensive tool for image and 
-camera tasks, in essense a really fun and interactive library to learn.
+This complements the surveillance system by providing context:
 
-Additionally, I wanted to learn simple, yet crucial files and file management within a project. Using config files, .env, .gitignore
-are all basic, but a must when creating a public project and for ease of access with classified variables. 
+If crime trends increase → surveillance demand logically increases.
 
-Furthermore, whilst I could have created my own or trained my own machine learning model (may do for the future), I find that given
-my current circumstance, why reinvent the wheel, when I can use the wheel to create something else. We won't create our own AI 
-just to help us to debug or do homework (unless we wanted to learn how to actually create one ourselves and understand the true
-nature and background). No shame to this, but with my timeframe it is hard to replicate. 
+</details>
 
-To make the project stand out a bit more, I added the knowledge I learnt from my university course (COMP2011), utilising an ARIMA 
-model to predict the crime rate within Australia which helped to strengthen my reasoning for my product choice. It is a good way to 
-storytell and be interactive with what we are making. 
+---
+
+# Tech Stack
+
+| Component          | Tool Used            |
+|-------------------|----------------------|
+| Object Detection  | YOLOv8 (Ultralytics) |
+| Camera System     | OpenCV               |
+| Alerts            | Courier API          |
+| Forecasting       | ARIMA (StatsModels)  |
+| Containerization  | Docker               |
+| Env Management    | python-dotenv        |
+
+---
+
+# Future Improvements
+
+- [ ] Train a custom YOLO model  
+- [ ] Store detections in database  (SQL)
+- [ ] Add app/web dashboard  
+- [ ] Real-time streaming interface  
+
+---

@@ -127,14 +127,6 @@ class LiveFeed():
             
             if(boolean_ret): # if successful 
 
-
-                """
-                1. We want to install a countdown, a time for the user to be able to leave the house.
-                2. In this time before the countdown concludes, we will utilise the pre-annotated frame.
-                3. Present the date, time but no detection, no intruder count. 
-
-                """
-
                 self.result_frame = capture_frame # result frame is the final frame we will display. 
 
                 if self.system_activated: 
@@ -156,16 +148,6 @@ class LiveFeed():
                         self.frame_buffer.append(annotated_frame)
 
                         cv2.putText(annotated_frame, "Monitoring System Is Now Activated", (20, 300), cv2.FONT_HERSHEY_DUPLEX, 1, (255, 255, 255), 2)
-                        
-
-                        """
-                        We have the following steps we need to ensure that is working: 
-
-                        1. The counter for intruders is on.
-                        2. The timer for any appearance of an intruder is on. (If exceeding 5 seconds, system alerts user).
-                        3. When the timer does exceed x seconds and intruders dissapear, the system will capture from 
-                            when alarm is activated to x seconds after no intruders are detected.
-                        """
             
                         self.intruder_count = len(results[0].boxes) #counts number of boxes identified -> aka, number of intruders 
                         
@@ -202,6 +184,18 @@ class LiveFeed():
 
                             
                             # File Writing ---------
+                            
+                            """
+                            The file writing aspect of our system follows the following:
+                            
+                            1. Everytime an intruder is detected, it will alert the system
+                                and log in a seperate file. 
+                                
+                            2. Due to the current system implementation, this will alert once for everytime a person appears
+                                or dissapears from the system view.
+                                
+                            3. Depending on the intruder / intruders, this will determine the file content that we write. 
+                            """
                             
                             file_path = "logbook.txt"
                             
