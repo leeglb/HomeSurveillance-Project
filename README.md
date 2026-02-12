@@ -165,6 +165,7 @@ docker run surveillanceproject
 <details>
 <summary>Why forecasting?</summary>
 
+
 Using an ARIMA model, I analysed Australian crime data to predict future trends.
 
 This complements the surveillance system by providing context:
