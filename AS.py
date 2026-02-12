@@ -1,8 +1,7 @@
 import cv2
 
 from ultralytics import YOLO
-from config import API_KEY
-from config import USER_EMAIL
+from requirement_files.config import API_KEY, USER_EMAIL
 from courier import Courier
 from datetime import datetime 
 from collections import deque
